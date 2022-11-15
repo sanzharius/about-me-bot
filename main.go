@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bot, err := tgbotapi.NewBotAPI(os.Getenv(cfg.My_token))
+	bot, err := tgbotapi.NewBotAPI(cfg.MyToken)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -40,30 +40,37 @@ func main() {
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-		switch update.Message.Text {
+		switch update.Message.Command() {
 		case "/start", "/help":
 			msg.ReplyMarkup = numericKeyboard
+		case "close":
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
 		}
 
 		if _, err := bot.Send(msg); err != nil {
 			log.Panic(err)
 		}
-		log.Print("starting server...")
+		txt := tgbotapi.NewMessage(update.Message.Chat.ID, "Hi, my name is Sanzhar, I study Go")
+		txt2 := tgbotapi.NewMessage(update.Message.Chat.ID, "https://github.com/sanzharius, https://www.linkedin.com/in/sanzhar-umarov-713818252/")
 
-		port := os.Getenv("PORT")
-		if port == "" {
-			port = "8080"
+		switch update.Message.Text {
+		case numericKeyboard.Keyboard[0][0].Text:
+			fmt.Printf("message: %s\n", update.Message.Text)
+			if _, err := bot.Send(txt); err != nil {
+				log.Panic(err)
+			}
+		case numericKeyboard.Keyboard[0][1].Text:
+			fmt.Printf("message: %s\n", update.Message.Text)
+			if _, err := bot.Send(txt2); err != nil {
+				log.Panic(err)
+			}
 		}
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
-
-		/*KeyboardButtons := tgbotapi.NewKeyboardButton("")
-
-		switch KeyboardButtons {
-		case tgbotapi.NewKeyboardButton("/about"):
-			fmt.Println("Hi, my name is Sanzhar, I study Go")
-		case tgbotapi.NewKeyboardButton("/links"):
-			fmt.Println("https://github.com/sanzharius, https://www.linkedin.com/in/sanzhar-umarov-713818252/")
-		}*/
 
 	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
