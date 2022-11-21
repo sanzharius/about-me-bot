@@ -9,8 +9,8 @@ import (
 )
 
 type config struct {
-	My_token string `env:"MY_TOKEN"`
-	Port     string `env:"PORT"`
+	MyToken string `env:"MYTOKEN"`
+	Port    string `env:"PORT"`
 }
 
 func Init() (*config, error) {
@@ -19,9 +19,9 @@ func Init() (*config, error) {
 		log.Fatal(err)
 	}
 
-	My_token := os.Getenv("MY_TOKEN")
+	MyToken := os.Getenv("MYTOKEN")
 
-	fmt.Println(My_token)
+	fmt.Println(MyToken)
 
 	Port := os.Getenv("PORT")
 
