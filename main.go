@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
+	log "github.com/sirupsen/logrus"
+	"net/http"
 	"os"
+	"time"
 )
 
 var numericKeyboard = tgbotapi.NewReplyKeyboard(
@@ -17,16 +17,31 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 )
 
 func main() {
+
+	log.WithFields(log.Fields{
+		"out":  os.Stderr,
+		"time": time.Now(),
+	}).Info("A new message received")
+
+	log.SetOutput(os.Stdout)
+	log.SetFormatter(&log.JSONFormatter{})
+	LogLevel, err := log.ParseLevel(os.Getenv("LOGLEVEL"))
+	if err != nil {
+		LogLevel = log.InfoLevel
+	}
+
+	log.SetLevel(LogLevel)
+
 	cfg, err := Init()
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	bot, err := tgbotapi.NewBotAPI(cfg.MyToken)
 	if err != nil {
 		log.Panic(err)
 	}
 	bot.Debug = true
-
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
@@ -43,7 +58,7 @@ func main() {
 		switch update.Message.Command() {
 		case "/start", "/help":
 			msg.ReplyMarkup = numericKeyboard
-		case "close":
+		case "/close":
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 
 		}
@@ -68,9 +83,11 @@ func main() {
 		}
 
 	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+
 }
