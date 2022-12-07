@@ -1,11 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -15,6 +19,17 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("/links"),
 	),
 )
+
+var numericKeyboard2 = tgbotapi.NewReplyKeyboard(
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("/🇺🇸 US"),
+		tgbotapi.NewKeyboardButton("/🇬🇧 GB"),
+		tgbotapi.NewKeyboardButton("/🇩🇪 DE"),
+		tgbotapi.NewKeyboardButton("/🇯🇵 JP"),
+	),
+)
+
+var countrycode = map[string]string{"US": "US", "GB": "GB", "DE": "DE", "JP": "JP"}
 
 func main() {
 
@@ -53,14 +68,19 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		if !update.Message.IsCommand() {
+			continue
+		}
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Command())
 
 		switch update.Message.Command() {
-		case "/start", "/help":
+		case "/help":
 			msg.ReplyMarkup = numericKeyboard
+		case "/start":
+			msg.ReplyMarkup = numericKeyboard2
 		case "/close":
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-
 		}
 
 		if _, err := bot.Send(msg); err != nil {
@@ -68,6 +88,8 @@ func main() {
 		}
 		txt := tgbotapi.NewMessage(update.Message.Chat.ID, "Hi, my name is Sanzhar, I study Go")
 		txt2 := tgbotapi.NewMessage(update.Message.Chat.ID, "https://github.com/sanzharius, https://www.linkedin.com/in/sanzhar-umarov-713818252/")
+		txt3 := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("No holidays today in %s", update.Message.Text))
+		txt4 := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Holidays celebrated in %s today are:", update.Message.Text))
 
 		switch update.Message.Text {
 		case numericKeyboard.Keyboard[0][0].Text:
@@ -80,6 +102,51 @@ func main() {
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
 			}
+		case numericKeyboard2.Keyboard[0][0].Text:
+			holidays, _ := MakeRequest(update.Message.Text)
+			if _, err := bot.Send(txt4); err != nil {
+				log.Panic(err)
+			}
+			if len(holidays) == 0 {
+				fmt.Printf("message: %s\n", update.Message.Text)
+				if _, err := bot.Send(txt3); err != nil {
+					log.Panic(err)
+				}
+			}
+		case numericKeyboard2.Keyboard[0][1].Text:
+			holidays, _ := MakeRequest(update.Message.Text)
+			if _, err := bot.Send(txt4); err != nil {
+				log.Panic(err)
+			}
+			if len(holidays) == 0 {
+				fmt.Printf("message: %s\n", update.Message.Text)
+				if _, err := bot.Send(txt3); err != nil {
+					log.Panic(err)
+				}
+			}
+		case numericKeyboard2.Keyboard[0][2].Text:
+			holidays, _ := MakeRequest(update.Message.Text)
+			if _, err := bot.Send(txt4); err != nil {
+				log.Panic(err)
+			}
+			if len(holidays) == 0 {
+				fmt.Printf("message: %s\n", update.Message.Text)
+				if _, err := bot.Send(txt3); err != nil {
+					log.Panic(err)
+				}
+			}
+		case numericKeyboard2.Keyboard[0][3].Text:
+			holidays, _ := MakeRequest(update.Message.Text)
+			if _, err := bot.Send(txt4); err != nil {
+				log.Panic(err)
+			}
+			if len(holidays) == 0 {
+				fmt.Printf("message: %s\n", update.Message.Text)
+				if _, err := bot.Send(txt3); err != nil {
+					log.Panic(err)
+				}
+			}
+
 		}
 
 	}
@@ -89,5 +156,39 @@ func main() {
 		port = "8080"
 	}
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+
+}
+
+func MakeRequest(country string) ([]Holiday, error) {
+	cfg, err := Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	year, month, day := time.Now().Date()
+	r := url.Values{}
+	r.Add("country", countrycode[country])
+	r.Add("api_key", cfg.HolidayApiKey)
+	r.Add("day", strconv.Itoa(day))
+	r.Add("month", strconv.Itoa(int(month)))
+	r.Add("year", strconv.Itoa(year))
+
+	resp, err := http.Get(cfg.HolidayApiHost)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(string(body))
+
+	var HolUpdate []Holiday
+	err = json.Unmarshal(body, &HolUpdate)
+	if err != nil {
+		return nil, fmt.Errorf("сouldn't unmarshall to struct: %w", err)
+	}
+	return HolUpdate, nil
 
 }
