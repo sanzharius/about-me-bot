@@ -81,44 +81,44 @@ func main() {
 		switch update.Message.Text {
 		case numericKeyboard.Keyboard[0][0].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			fmt.Printf("message: %s\n", holidays)
+			log.Printf("message: %s\n", holidays)
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
 			} else if len(holidays) == 0 {
-				fmt.Printf("message: %s\n", update.Message.Text)
+				log.Printf("message: %s\n", update.Message.Text)
 				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
 		case numericKeyboard.Keyboard[0][1].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			fmt.Printf("message: %s\n", holidays)
+			log.Printf("message: %s\n", holidays)
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
 			} else if len(holidays) == 0 {
-				fmt.Printf("message: %s\n", update.Message.Text)
+				log.Printf("message: %s\n", update.Message.Text)
 				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
 		case numericKeyboard.Keyboard[1][0].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			fmt.Printf("message: %s\n", holidays)
+			log.Printf("message: %s\n", holidays)
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
 			} else if len(holidays) == 0 {
-				fmt.Printf("message: %s\n", update.Message.Text)
+				log.Printf("message: %s\n", update.Message.Text)
 				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
 		case numericKeyboard.Keyboard[1][1].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			fmt.Printf("message: %s\n", holidays)
+			log.Printf("message: %s\n", holidays)
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
 			} else if len(holidays) == 0 {
-				fmt.Printf("message: %s\n", update.Message.Text)
+				log.Printf("message: %s\n", update.Message.Text)
 				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
