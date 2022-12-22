@@ -15,15 +15,10 @@ import (
 
 var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("/about"),
-		tgbotapi.NewKeyboardButton("/links"),
-	),
-)
-
-var numericKeyboard2 = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("/🇺🇸 US"),
 		tgbotapi.NewKeyboardButton("/🇬🇧 GB"),
+	),
+	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("/🇩🇪 DE"),
 		tgbotapi.NewKeyboardButton("/🇯🇵 JP"),
 	),
@@ -68,87 +63,68 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		if !update.Message.IsCommand() {
-			continue
-		}
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Command())
-
-		switch update.Message.Command() {
-		case "/help":
-			msg.ReplyMarkup = numericKeyboard
+		switch update.Message.Text {
 		case "/start":
-			msg.ReplyMarkup = numericKeyboard2
+			msg.ReplyMarkup = numericKeyboard
 		case "/close":
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		}
-
 		if _, err := bot.Send(msg); err != nil {
 			log.Panic(err)
 		}
-		txt := tgbotapi.NewMessage(update.Message.Chat.ID, "Hi, my name is Sanzhar, I study Go")
-		txt2 := tgbotapi.NewMessage(update.Message.Chat.ID, "https://github.com/sanzharius, https://www.linkedin.com/in/sanzhar-umarov-713818252/")
-		txt3 := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("No holidays today in %s", update.Message.Text))
-		txt4 := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Holidays celebrated in %s today are:", update.Message.Text))
+
+		txt := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("No holidays today in %s", update.Message.Text))
+		txt2 := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Holidays celebrated in %s today are:", update.Message.Text))
 
 		switch update.Message.Text {
 		case numericKeyboard.Keyboard[0][0].Text:
-			fmt.Printf("message: %s\n", update.Message.Text)
-			if _, err := bot.Send(txt); err != nil {
-				log.Panic(err)
-			}
-		case numericKeyboard.Keyboard[0][1].Text:
-			fmt.Printf("message: %s\n", update.Message.Text)
+			holidays, _ := MakeRequest(update.Message.Text)
+			fmt.Printf("message: %s\n", holidays)
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
-			}
-		case numericKeyboard2.Keyboard[0][0].Text:
-			holidays, _ := MakeRequest(update.Message.Text)
-			if _, err := bot.Send(txt4); err != nil {
-				log.Panic(err)
-			}
-			if len(holidays) == 0 {
+			} else if len(holidays) == 0 {
 				fmt.Printf("message: %s\n", update.Message.Text)
-				if _, err := bot.Send(txt3); err != nil {
+				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
-		case numericKeyboard2.Keyboard[0][1].Text:
+		case numericKeyboard.Keyboard[0][1].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			if _, err := bot.Send(txt4); err != nil {
+			fmt.Printf("message: %s\n", holidays)
+			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
-			}
-			if len(holidays) == 0 {
+			} else if len(holidays) == 0 {
 				fmt.Printf("message: %s\n", update.Message.Text)
-				if _, err := bot.Send(txt3); err != nil {
+				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
-		case numericKeyboard2.Keyboard[0][2].Text:
+		case numericKeyboard.Keyboard[1][0].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			if _, err := bot.Send(txt4); err != nil {
+			fmt.Printf("message: %s\n", holidays)
+			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
-			}
-			if len(holidays) == 0 {
+			} else if len(holidays) == 0 {
 				fmt.Printf("message: %s\n", update.Message.Text)
-				if _, err := bot.Send(txt3); err != nil {
+				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
-		case numericKeyboard2.Keyboard[0][3].Text:
+		case numericKeyboard.Keyboard[1][1].Text:
 			holidays, _ := MakeRequest(update.Message.Text)
-			if _, err := bot.Send(txt4); err != nil {
+			fmt.Printf("message: %s\n", holidays)
+			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
-			}
-			if len(holidays) == 0 {
+			} else if len(holidays) == 0 {
 				fmt.Printf("message: %s\n", update.Message.Text)
-				if _, err := bot.Send(txt3); err != nil {
+				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
 			}
 
 		}
-
 	}
 
 	port := os.Getenv("PORT")
