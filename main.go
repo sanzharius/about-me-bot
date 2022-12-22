@@ -96,7 +96,7 @@ func main() {
 			if _, err := bot.Send(txt2); err != nil {
 				log.Panic(err)
 			} else if len(holidays) == 0 {
-				fmt.Printf("message: %s\n", update.Message.Text)
+				log.Printf("message: %s\n", update.Message.Text)
 				if _, err := bot.Send(txt); err != nil {
 					log.Panic(err)
 				}
